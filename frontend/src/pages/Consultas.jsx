@@ -34,7 +34,7 @@ const CONSULTAS = [
         titulo: 'Cliente, producto, cantidad, precio y proveedor',
         path: '/consultas/detalle-compras',
         columns: [
-            { key: 'nombre_cliente', label: 'Cliente' },
+            { key: 'nombre_cliente', label: 'Cliente', compute: (row) => `${row.nombre_cliente} ${row.apellidos_cliente}` },
             { key: 'nombre_producto', label: 'Producto' },
             { key: 'cantidad', label: 'Cantidad' },
             { key: 'precio_compra', label: 'Precio unitario', format: money },
@@ -86,8 +86,8 @@ export default function Consultas() {
 
     const active = CONSULTAS.find((c) => c.key === activeKey);
     const trace = useMemo(
-        () => (active && base ? TRACES[active.key](base) : null),
-        [active, base],
+        () => (active && base ? TRACES[active.key]({ ...base, resultado: rows }) : null),
+        [active, base, rows],
     );
 
     return (

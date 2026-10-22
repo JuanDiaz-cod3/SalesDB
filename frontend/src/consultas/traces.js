@@ -2,9 +2,12 @@
 // Cada paso: { lines: [índices del SQL resaltados], caption, panels: [...] }
 // Cada panel: { id, title, columns, rows: [{ key, cells, state }], fresh? }
 // Estados de fila: base | hit | null | out | new
+//
+// Los pasos intermedios se calculan desde las tablas base; el paso final muestra
+// `resultado` (las filas que devolvió el SQL real), así el orden coincide siempre
+// con la tabla de resultados aunque haya empates en el ORDER BY.
 
-const money = (v) => `$${Number(v).toLocaleString('es-CO')}`;
-const byName = (a, b) => (a ?? '￿').localeCompare(b ?? '￿', 'es');
+export const money = (v) => `$${Number(v).toLocaleString('es-CO')}`;
 const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 
 function clienteJoinCompra(clientes, compras) {
@@ -38,7 +41,7 @@ const compraPanel = (compras) => ({
 
 const joinColumns = ['cl.id_cliente', 'cl.nombre', 'c.id_compra', 'c.id_cliente'];
 
-function consulta1({ clientes, compras }) {
+function consulta1({ clientes, compras, resultado }) {
     const sql = [
         'SELECT cl.id_cliente, cl.nombre, cl.apellidos,',
         '       COUNT(c.*) AS cantidad_pedidos',
@@ -54,7 +57,6 @@ function consulta1({ clientes, compras }) {
         return { cl, ids };
     });
     const conteo = grupos.map(({ cl, ids }) => ({ cl, n: ids.length }));
-    const ordenado = [...conteo].sort((a, b) => b.n - a.n);
 
     return {
         sql,
@@ -108,14 +110,14 @@ function consulta1({ clientes, compras }) {
                     id: 'resultado',
                     title: 'resultado',
                     columns: ['id_cliente', 'nombre', 'apellidos', 'cantidad_pedidos'],
-                    rows: ordenado.map(({ cl, n }) => ({ key: `r-${cl.id_cliente}`, cells: [cl.id_cliente, cl.nombre, cl.apellidos, String(n)], state: 'new' })),
+                    rows: resultado.map((r) => ({ key: `r-${r.id_cliente}`, cells: [r.id_cliente, r.nombre, r.apellidos, String(r.cantidad_pedidos)], state: 'new' })),
                 }],
             },
         ],
     };
 }
 
-function consulta2({ clientes, compras }) {
+function consulta2({ clientes, compras, resultado }) {
     const sql = [
         'SELECT cl.*',
         'FROM cliente cl',
@@ -123,7 +125,6 @@ function consulta2({ clientes, compras }) {
         'WHERE c.id_cliente IS NULL;',
     ];
     const joined = clienteJoinCompra(clientes, compras);
-    const sinCompras = clientes.filter((cl) => !compras.some((c) => c.id_cliente === cl.id_cliente));
 
     return {
         sql,
@@ -150,14 +151,14 @@ function consulta2({ clientes, compras }) {
             },
             {
                 lines: [0],
-                caption: sinCompras.length
-                    ? `SELECT cl.*: de las filas que quedaron se muestran todas las columnas del cliente. ${plural(sinCompras.length, 'cliente', 'clientes')} sin pedidos.`
+                caption: resultado.length
+                    ? `SELECT cl.*: de las filas que quedaron se muestran todas las columnas del cliente. ${plural(resultado.length, 'cliente', 'clientes')} sin pedidos.`
                     : 'SELECT cl.*: no quedó ninguna fila. Todos los clientes tienen al menos un pedido.',
                 panels: [{
                     id: 'resultado',
                     title: 'resultado',
                     columns: ['id_cliente', 'nombre', 'apellidos', 'direccion', 'fecha_nacimiento'],
-                    rows: sinCompras.map((cl) => ({
+                    rows: resultado.map((cl) => ({
                         key: `r-${cl.id_cliente}`,
                         cells: [cl.id_cliente, cl.nombre, cl.apellidos, cl.direccion, cl.fecha_nacimiento],
                         state: 'new',
@@ -168,7 +169,7 @@ function consulta2({ clientes, compras }) {
     };
 }
 
-function consulta3({ clientes, compras, productos, proveedores }) {
+function consulta3({ clientes, compras, productos, proveedores, resultado }) {
     const sql = [
         'SELECT cl.nombre AS nombre_cliente,',
         '       cl.apellidos AS apellidos_cliente,',
@@ -187,7 +188,6 @@ function consulta3({ clientes, compras, productos, proveedores }) {
         const pr = proveedores.find((x) => x.nit === p.nit_proveedor) ?? {};
         return { c, cl, p, pr };
     });
-    const ordenado = [...filas].sort((a, b) => b.c.fecha_compra.localeCompare(a.c.fecha_compra));
 
     return {
         sql,
@@ -242,9 +242,9 @@ function consulta3({ clientes, compras, productos, proveedores }) {
                     id: 'resultado',
                     title: 'resultado',
                     columns: ['nombre_cliente', 'producto', 'cantidad', 'precio_compra', 'proveedor'],
-                    rows: ordenado.map(({ c, cl, p, pr }) => ({
-                        key: `r-${c.id_compra}`,
-                        cells: [`${cl.nombre ?? ''} ${cl.apellidos ?? ''}`.trim(), p.nombre, String(c.cantidad), money(c.precio_compra), pr.nombre],
+                    rows: resultado.map((r, i) => ({
+                        key: `r-${i}`,
+                        cells: [`${r.nombre_cliente} ${r.apellidos_cliente}`, r.nombre_producto, String(r.cantidad), money(r.precio_compra), r.nombre_proveedor],
                         state: 'new',
                     })),
                 }],
@@ -253,7 +253,7 @@ function consulta3({ clientes, compras, productos, proveedores }) {
     };
 }
 
-function consulta4({ productos, proveedores }) {
+function consulta4({ productos, proveedores, resultado }) {
     const sql = [
         'SELECT pr.nit, pr.nombre AS nombre_proveedor, p.codigo,',
         '       p.nombre AS nombre_producto, p.precio_unitario',
@@ -270,7 +270,6 @@ function consulta4({ productos, proveedores }) {
             for (const p of suyos) joined.push({ pr, p });
         }
     }
-    const ordenado = [...joined].sort((a, b) => byName(a.pr.nombre, b.pr.nombre) || byName(a.p?.nombre, b.p?.nombre));
     const sinProductos = proveedores.filter((pr) => !productos.some((p) => p.nit_proveedor === pr.nit)).length;
 
     const row = ({ pr, p }, prefix, state) => ({
@@ -329,7 +328,11 @@ function consulta4({ productos, proveedores }) {
                     id: 'resultado',
                     title: 'resultado',
                     columns: ['nit', 'nombre_proveedor', 'codigo', 'nombre_producto', 'precio_unitario'],
-                    rows: ordenado.map((j) => row(j, 'r', 'new')),
+                    rows: resultado.map((r, i) => ({
+                        key: `r-${i}`,
+                        cells: [r.nit, r.nombre_proveedor, r.codigo, r.nombre_producto, r.precio_unitario == null ? null : money(r.precio_unitario)],
+                        state: r.codigo == null ? 'null' : 'new',
+                    })),
                 }],
             },
         ],
