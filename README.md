@@ -84,6 +84,7 @@ Requisitos: Node.js 20 o superior, y acceso a una base PostgreSQL (la de Supabas
      psql -U postgres -d salesdb -f backend/db/schema.sql
      ```
      (El segundo comando avisa que `salesdb` ya existe; es inofensivo.)
+   - Opcional: carga los datos de prueba del informe con `backend/db/seed.sql`, de la misma forma (SQL Editor en Supabase, o `psql -U postgres -d salesdb -f backend/db/seed.sql` en local). Solo funciona sobre tablas vacías.
 
 2. **Backend**:
    ```bash
@@ -161,6 +162,7 @@ Hecho:
 - [x] Diagrama entidad-relación (`frontend/public/basedb.png`), verificado contra `schema.sql`.
 - [x] Script SQL, ejecutado en Supabase.
 - [x] Desplegado en Vercel (frontend y backend), con los links arriba.
+- [x] Datos de prueba del informe (`backend/db/seed.sql`) cargados en Supabase. Las 4 consultas dan los resultados esperados: Carlos 2 pedidos, María 1, Laura 0 y sin pedidos.
 - [x] Backend: CRUD de clientes, productos y proveedores; crear, editar y borrar pedidos; las 4 consultas.
 - [x] Frontend: landing y app con Clientes, Productos, Proveedores, Pedidos y Consultas.
 - [x] Confirmación antes de borrar, estados de carga, mensajes de éxito y error, avisos cuando faltan datos previos (por ejemplo, no se puede crear un producto sin proveedores).
@@ -168,7 +170,6 @@ Hecho:
 Pendiente:
 - [ ] Modelo relacional en formato de documento para el Word (el contenido está en la sección "Modelo relacional").
 - [ ] Definir el número de grupo y armar el Word con capturas de la app y de las consultas.
-- [ ] Probar el flujo completo con datos de prueba (la base está vacía).
 
 ## Notas
 
