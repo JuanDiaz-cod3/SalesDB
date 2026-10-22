@@ -54,6 +54,60 @@ button {
   color: #000;
 }
 
+/* ---- controles nativos del navegador, alineados con la paleta ---- */
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 :focus-visible {
   outline: 1px solid rgba(255, 255, 255, 0.7);
   outline-offset: 3px;
@@ -165,6 +219,19 @@ button {
 .field input:focus,
 .field select:focus {
   border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+/* En campos subrayados, el foco engrosa la línea en vez de dibujar un recuadro. */
+.field input:focus-visible,
+.field select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--text);
+  box-shadow: 0 1px 0 var(--text);
+}
+
+.field input,
+.field select {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .field input:disabled,
