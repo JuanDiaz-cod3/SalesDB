@@ -49,6 +49,11 @@ button {
   cursor: pointer;
 }
 
+::selection {
+  background: rgba(255, 255, 255, 0.85);
+  color: #000;
+}
+
 :focus-visible {
   outline: 1px solid rgba(255, 255, 255, 0.7);
   outline-offset: 3px;
@@ -195,6 +200,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: clamp(13px, 0.85vw, 15px);
+  font-variant-numeric: tabular-nums;
 }
 
 thead th {

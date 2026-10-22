@@ -1,0 +1,312 @@
+/* Panel "Cómo se resuelve". Solo usa la paleta existente:
+   el énfasis sube por intensidad del blanco, nunca por un color nuevo. */
+
+.trace {
+    --trace-faint: rgba(255, 255, 255, 0.28);
+    --trace-lit: rgba(255, 255, 255, 0.075);
+    --trace-rule: rgba(255, 255, 255, 0.85);
+
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.015);
+    padding: clamp(18px, 1.6vw, 26px);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+.trace__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.trace__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(17px, 1.3vw, 20px);
+    letter-spacing: 0.005em;
+}
+
+.trace__count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ---- progreso por pasos ---- */
+
+.trace-progress {
+    display: flex;
+    gap: 4px;
+    margin-top: -6px;
+}
+
+.trace-progress__seg {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    background: var(--line);
+    overflow: hidden;
+    transition: background 0.3s ease;
+}
+
+.trace-progress__seg.is-done,
+.trace-progress__seg.is-current {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.trace-progress.is-playing .trace-progress__seg.is-current {
+    background: var(--trace-faint);
+}
+
+.trace-progress__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--text);
+    transform-origin: left center;
+    animation: trace-fill linear forwards;
+}
+
+@keyframes trace-fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+/* ---- SQL ---- */
+
+.trace-sql {
+    margin: 0;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: clamp(11.5px, 0.78vw, 13px);
+    line-height: 1.75;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.trace-sql__line {
+    display: block;
+    padding: 0 12px 0 10px;
+    color: var(--text-dimmer);
+    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trace-sql__line.is-active {
+    color: var(--text);
+    background: var(--trace-lit);
+    box-shadow: inset 1px 0 0 var(--trace-rule);
+}
+
+.trace-sql__num {
+    display: inline-block;
+    width: 2.6em;
+    color: var(--trace-faint);
+    user-select: none;
+}
+
+.trace-sql__line.is-active .trace-sql__num {
+    color: var(--text-dim);
+}
+
+/* ---- explicación del paso ---- */
+
+.trace__caption {
+    margin: 0;
+    min-height: 3em;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(14px, 0.95vw, 16px);
+    line-height: 1.5;
+    color: var(--text);
+    max-width: 62ch;
+}
+
+/* ---- tablas intermedias ---- */
+
+.trace__stage {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 180px;
+}
+
+.trace-panel {
+    border: 1px solid var(--line);
+    animation: trace-scan 0.6s var(--ease-premium) both;
+}
+
+/* Barrido de izquierda a derecha, como una lectura de terminal. */
+@keyframes trace-scan {
+    from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+    to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+.trace-panel__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.trace-panel__body {
+    overflow-x: auto;
+}
+
+.trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.trace-table th {
+    text-align: left;
+    font-weight: 400;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--text-dimmer);
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    transition: color 0.3s ease;
+}
+
+.trace-table th.trace-col--fresh {
+    color: var(--text);
+}
+
+.trace-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.trace-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.trace-row {
+    color: var(--text-dim);
+    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+.trace-row--hit {
+    color: var(--text);
+    background: var(--trace-lit);
+    box-shadow: inset 1px 0 0 var(--trace-rule);
+}
+
+.trace-row--null {
+    color: var(--text-dim);
+}
+
+.trace-row--out {
+    opacity: 0.32;
+}
+
+.trace-row--out td {
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dimmer);
+}
+
+.trace-row--new {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.trace-null {
+    display: inline-block;
+    padding: 0 6px;
+    border: 1px dashed var(--line-strong);
+    color: var(--text-dimmer);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+}
+
+.trace-cell--fresh {
+    animation: trace-cell-in 0.5s var(--ease-premium) both;
+}
+
+@keyframes trace-cell-in {
+    from { opacity: 0; clip-path: inset(0 100% 0 0); }
+    to { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+.trace-empty {
+    padding: 18px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dimmer);
+}
+
+/* ---- controles ---- */
+
+.trace__controls {
+    display: flex;
+    gap: 8px;
+}
+
+.trace-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 0;
+    border: 1px solid var(--line-strong);
+    background: var(--fill-ghost);
+    color: var(--text-dim);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.trace-btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.trace-btn--main {
+    background: var(--fill-solid);
+    color: var(--text);
+}
+
+.trace-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.trace-btn:disabled:hover {
+    background: var(--fill-ghost);
+    color: var(--text-dim);
+    border-color: var(--line-strong);
+}
+
+/* Movimiento reducido: sin barridos ni desplazamientos;
+   los cambios de estado (brillo, tachado) se mantienen. */
+@media (prefers-reduced-motion: reduce) {
+    .trace-panel,
+    .trace-cell--fresh {
+        animation: none;
+    }
+    .trace-progress__fill {
+        display: none;
+    }
+}

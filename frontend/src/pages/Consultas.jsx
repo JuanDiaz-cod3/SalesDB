@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { api } from '../api/client';
 import PageHeader from '../components/PageHeader';
+import QueryTrace from '../components/QueryTrace';
+import { TRACES } from '../consultas/traces';
+import './Consultas.css';
 
 const money = (v) => `$${Number(v).toLocaleString('es-CO')}`;
 
@@ -56,13 +59,24 @@ export default function Consultas() {
     const [rows, setRows] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [base, setBase] = useState(null);
+    const [runs, setRuns] = useState(0);
 
     async function runConsulta(consulta) {
         setError(null);
+        setRuns((n) => n + 1);
         setActiveKey(consulta.key);
         setLoading(true);
         try {
-            setRows(await api.get(consulta.path));
+            const [resultado, clientes, compras, productos, proveedores] = await Promise.all([
+                api.get(consulta.path),
+                api.get('/clientes'),
+                api.get('/compras'),
+                api.get('/productos'),
+                api.get('/proveedores'),
+            ]);
+            setRows(resultado);
+            setBase({ clientes, compras, productos, proveedores });
         } catch (err) {
             setError(err.message);
         } finally {
@@ -71,6 +85,10 @@ export default function Consultas() {
     }
 
     const active = CONSULTAS.find((c) => c.key === activeKey);
+    const trace = useMemo(
+        () => (active && base ? TRACES[active.key](base) : null),
+        [active, base],
+    );
 
     return (
         <div>
@@ -94,6 +112,7 @@ export default function Consultas() {
             {loading && <div className="empty-state">Cargando…</div>}
 
             {!loading && active && (
+                <div className="consultas-split">
                 <div className="table-wrap">
                     <table>
                         <thead>
@@ -118,6 +137,8 @@ export default function Consultas() {
                         </tbody>
                     </table>
                     {rows.length === 0 && <div className="empty-state">Sin resultados.</div>}
+                </div>
+                {trace && <QueryTrace key={`${active.key}-${runs}`} trace={trace} />}
                 </div>
             )}
 
