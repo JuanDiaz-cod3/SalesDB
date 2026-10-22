@@ -2,8 +2,8 @@
 
 Sistema de gestión de clientes, productos, proveedores y pedidos. Hecho para el Laboratorio 01 del curso de Bases de Datos: modelo entidad-relación, modelo relacional, script SQL y una aplicación web (Express + React) sobre PostgreSQL.
 
-- **App desplegada**: _pendiente — URL del frontend en Vercel_
-- **API desplegada**: _pendiente — URL del backend en Vercel_
+- **App desplegada**: https://sales-db-five.vercel.app
+- **API desplegada**: https://salesdb-api.vercel.app (rutas bajo `/api`, por ejemplo [`/api/clientes`](https://salesdb-api.vercel.app/api/clientes))
 
 **Número de grupo: pendiente.** El Word a entregar se llama `LABORATOTIO_1_GRUPO_<#>`.
 
@@ -116,16 +116,18 @@ Requisitos: Node.js 20 o superior, y acceso a una base PostgreSQL (la de Supabas
 
 | Variable | Valor |
 |---|---|
-| `VITE_API_URL` | URL del backend desplegado + `/api`, por ejemplo `https://salesdb-api.vercel.app/api` |
+| `VITE_API_URL` | URL del backend desplegado + `/api`: `https://salesdb-api.vercel.app/api` |
 
 ## Despliegue (Vercel + Supabase)
 
 El repo se importa en Vercel como **dos proyectos**:
 
-| Proyecto | Root Directory | Framework | Variables |
+| Proyecto en Vercel | Root Directory | Preset | Variables |
 |---|---|---|---|
-| Backend | `backend` | Other | `DATABASE_URL`, `DB_SSL` |
-| Frontend | `frontend` | Vite | `VITE_API_URL` |
+| `salesdb-api` (backend) | `backend` | Other | `DATABASE_URL`, `DB_SSL` |
+| `sales-db` (frontend) | `frontend` | Vite | `VITE_API_URL` |
+
+El backend usa `backend/vercel.json` para compilar solo `api/index.js` como función y mandar todas las rutas ahí. Sin eso, Vercel publicaría el código de la carpeta como archivos estáticos.
 
 Cada `git push` a `main` vuelve a desplegar los dos. Si cambias `VITE_API_URL`, hay que redesplegar el frontend: la variable se incrusta al compilar.
 
@@ -158,12 +160,12 @@ Si una llave foránea impide un borrado (por ejemplo, un proveedor que todavía 
 Hecho:
 - [x] Diagrama entidad-relación (`frontend/public/basedb.png`), verificado contra `schema.sql`.
 - [x] Script SQL, ejecutado en Supabase.
+- [x] Desplegado en Vercel (frontend y backend), con los links arriba.
 - [x] Backend: CRUD de clientes, productos y proveedores; crear, editar y borrar pedidos; las 4 consultas.
 - [x] Frontend: landing y app con Clientes, Productos, Proveedores, Pedidos y Consultas.
 - [x] Confirmación antes de borrar, estados de carga, mensajes de éxito y error, avisos cuando faltan datos previos (por ejemplo, no se puede crear un producto sin proveedores).
 
 Pendiente:
-- [ ] Terminar el despliegue en Vercel y poner los links arriba.
 - [ ] Modelo relacional en formato de documento para el Word (el contenido está en la sección "Modelo relacional").
 - [ ] Definir el número de grupo y armar el Word con capturas de la app y de las consultas.
 - [ ] Probar el flujo completo con datos de prueba (la base está vacía).
