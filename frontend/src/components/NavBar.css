@@ -1,0 +1,48 @@
+.appnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px var(--gutter);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+    overflow-x: auto;
+}
+
+.appnav__logo {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(18px, 1.4vw, 24px);
+    letter-spacing: 0.16em;
+    flex-shrink: 0;
+}
+
+.appnav__links {
+    display: flex;
+    gap: clamp(16px, 2vw, 36px);
+}
+
+.appnav__link {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.appnav__link:hover {
+    color: var(--text);
+}
+
+.appnav__link--active {
+    color: var(--text);
+    border-bottom-color: var(--line-strong);
+}
